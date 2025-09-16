@@ -1,0 +1,46 @@
+[
+  {
+    "id": 1,
+    "name": "충장로 빈티지샵 자리",
+    "address": "광주광역시 동구 충장로 123",
+    "area": "50㎡",
+    "position": [35.1497, 126.9142],
+    "floorPlan": {
+      "width": 500,
+      "height": 400,
+      "walls": [
+        { "id": "w1", "x": 0, "y": 0, "width": 500, "height": 10 },
+        { "id": "w2", "x": 0, "y": 390, "width": 500, "height": 10 },
+        { "id": "w3", "x": 0, "y": 10, "width": 10, "height": 380 },
+        { "id": "w4", "x": 490, "y": 10, "width": 10, "height": 380 }
+      ]
+    }
+  },
+  {
+    "id": 2,
+    "name": "전대후문 카페 자리",
+    "address": "광주광역시 북구 용봉동 456",
+    "area": "75㎡",
+    "position": [35.1769, 126.9136],
+    "floorPlan": {
+      "width": 600,
+      "height": 500,
+      "walls": [
+        { "id": "w1", "x": 0, "y": 0, "width": 600, "height": 10 },
+        { "id": "w2", "x": 0, "y": 490, "width": 300, "height": 10 },
+        { "id": "w3", "x": 0, "y": 10, "width": 10, "height": 480 },
+        { "id": "w4", "x": 590, "y": 10, "width": 10, "height": 250 },
+        { "id": "w5", "x": 290, "y": 260, "width": 310, "height": 10 },
+        { "id": "w6", "x": 290, "y": 270, "width": 10, "height": 230 }
+      ]
+    }
+  },
+  {
+    "id": 3,
+    "name": "상무지구 식당 자리",
+    "address": "광주광역시 서구 치평동 789",
+    "area": "120㎡",
+    "position": [35.1523, 126.8533],
+    "floorPlan": null
+  }
+]
