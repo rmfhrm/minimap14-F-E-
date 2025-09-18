@@ -3,7 +3,7 @@ import { useDroppable } from '@dnd-kit/core';
 import PlacedItem from './PlacedItem';
 import PartitionWall from './PartitionWall';
 
-const FloorPlan = forwardRef(({ plan, placedItems, walls, onDeleteItem, onSetHoveredItem, floorTexture, onWallChange }, ref) => {
+const FloorPlan = forwardRef(({ plan, placedItems, walls, onDeleteItem, onSetHoveredItem, floorTexture, onWallChange, onItemChange }, ref) => {
   const { setNodeRef } = useDroppable({
     id: 'floor-plan-droppable-area',
   });
@@ -41,7 +41,6 @@ const FloorPlan = forwardRef(({ plan, placedItems, walls, onDeleteItem, onSetHov
         backgroundSize: '100px',
       }}
     >
-      {/* 고정 벽 */}
       {plan.walls.map(wall => (
         <div
           key={wall.id}
@@ -52,18 +51,15 @@ const FloorPlan = forwardRef(({ plan, placedItems, walls, onDeleteItem, onSetHov
           }}
         />
       ))}
-
-      {/* 배치된 가구 */}
       {placedItems.map(item => (
         <PlacedItem
           key={item.id}
           item={item}
           onDeleteItem={onDeleteItem}
           onSetHoveredItem={onSetHoveredItem}
+          onItemChange={onItemChange}
         />
       ))}
-      
-      {/* 배치된 가벽 */}
       {walls.map(wall => (
         <PartitionWall
           key={wall.id}

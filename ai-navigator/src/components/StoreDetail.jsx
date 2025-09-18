@@ -5,7 +5,7 @@ import FloorPlan from './FloorPlan';
 import FurniturePalette from './FurniturePalette';
 import PartitionWall from './PartitionWall';
 
-const StoreDetail = ({ store }) => {
+const StoreDetail = ({ store, onClose }) => {
   const [placedItems, setPlacedItems] = useState([]);
   const [walls, setWalls] = useState([]);
   const floorPlanRef = useRef(null);
@@ -15,13 +15,37 @@ const StoreDetail = ({ store }) => {
   const [hoveredItemId, setHoveredItemId] = useState(null);
   const [floorTexture, setFloorTexture] = useState('/textures/wood-floor.png');
 
+  // 불러오기 기능: 상점이 바뀔 때마다 실행
   useEffect(() => {
-    setPlacedItems([]);
-    setWalls([]);
+    const savedLayout = localStorage.getItem(`layout-${store.id}`);
+    
+    if (savedLayout) {
+      const { items, walls: savedWalls, texture } = JSON.parse(savedLayout);
+      setPlacedItems(items || []);
+      setWalls(savedWalls || []);
+      setFloorTexture(texture || '/textures/wood-floor.png');
+    } else {
+      setPlacedItems([]);
+      setWalls([]);
+      setFloorTexture('/textures/wood-floor.png');
+    }
+
     setBusinessType('');
     setReport('');
-    setFloorTexture('/textures/wood-floor.png');
   }, [store]);
+
+  // 저장 기능: 배치 정보가 변경될 때마다 자동 저장
+  useEffect(() => {
+    if (store && store.id) {
+      const layoutData = {
+        items: placedItems,
+        walls: walls,
+        texture: floorTexture,
+      };
+      localStorage.setItem(`layout-${store.id}`, JSON.stringify(layoutData));
+    }
+  }, [placedItems, walls, floorTexture, store]);
+
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -72,6 +96,8 @@ const StoreDetail = ({ store }) => {
         x: relativeX,
         y: relativeY,
         rotation: 0,
+        width: active.data.current?.width,
+        height: active.data.current?.height,
       };
       setPlacedItems(prevItems => [...prevItems, newItem]);
     }
@@ -115,7 +141,7 @@ const StoreDetail = ({ store }) => {
       setIsLoading(false);
     }
   };
-
+  
   const handleAddWall = () => {
     const newWall = {
       id: `wall-${Date.now()}`,
@@ -128,7 +154,6 @@ const StoreDetail = ({ store }) => {
   };
 
   const handleWallChange = (id, updates) => {
-    // react-rnd는 width/height를 "150px" 같은 문자열로 반환하므로 숫자로 변환합니다.
     const numericUpdates = {};
     if (updates.width) numericUpdates.width = parseFloat(updates.width);
     if (updates.height) numericUpdates.height = parseFloat(updates.height);
@@ -141,14 +166,7 @@ const StoreDetail = ({ store }) => {
   };
 
   if (!store) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-center">
-          <p className="text-xl font-semibold text-gray-500">← 지도에서 상가를 선택해주세요.</p>
-          <p className="text-gray-400 mt-2">상가를 선택하면 상세 정보가 여기에 표시됩니다.</p>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   const floorOptions = [
@@ -159,8 +177,16 @@ const StoreDetail = ({ store }) => {
 
   return (
     <DndContext onDragEnd={handleDragEnd}>
-      <div className="p-6 h-full overflow-y-auto">
-        <div className="bg-white p-6 rounded-xl shadow-sm mb-6">
+      <div className="p-6 h-full overflow-y-auto relative">
+        <button 
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-2xl z-20"
+          title="닫기"
+        >
+          &times;
+        </button>
+
+        <div className="bg-white p-6 rounded-xl shadow-sm mb-6 mt-8">
           <h2 className="text-2xl font-bold mb-2 text-gray-800">{store.name}</h2>
           <p className="text-md text-gray-600">면적: {store.area}</p>
         </div>
@@ -174,6 +200,7 @@ const StoreDetail = ({ store }) => {
             <h4 className="text-md font-semibold mb-2 text-gray-700">구조물</h4>
             <button
               onClick={handleAddWall}
+              onMouseDownCapture={(e) => e.stopPropagation()}
               className="px-3 py-1.5 bg-indigo-500 text-white font-semibold rounded-md hover:bg-indigo-600 transition-colors text-sm"
             >
               + 가벽 추가
@@ -231,7 +258,6 @@ const StoreDetail = ({ store }) => {
               {isLoading ? '생성 중...' : '✨ 리포트 생성'}
             </button>
           </div>
-
           <div className="p-4 bg-gray-50 rounded-lg prose max-w-none prose-h3:mt-0">
             {report ? <ReactMarkdown>{report}</ReactMarkdown> : <p className="text-gray-500">가구를 배치하고 업종을 입력한 뒤 리포트를 생성해주세요.</p>}
           </div>
