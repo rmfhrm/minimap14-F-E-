@@ -1,41 +1,51 @@
 import React from 'react';
-import { useDraggable } from '@dnd-kit/core';
+import { Rnd } from 'react-rnd';
 
 const PIXEL_SCALE = 0.5;
 
-const PlacedItem = ({ item, onDeleteItem, onSetHoveredItem }) => {
-  const { attributes, listeners, setNodeRef, transform } = useDraggable({
-    id: item.id,
-    data: { isPlacedItem: true, }
-  });
+const PlacedItem = ({ item, onDeleteItem, onSetHoveredItem, onItemChange }) => {
+  const itemWidth = (item.width || 128) * PIXEL_SCALE;
+  const itemHeight = (item.height || 128) * PIXEL_SCALE;
 
-  const style = {
-    position: 'absolute',
-    left: item.x,
-    top: item.y,
-    width: (item.width || 128) * PIXEL_SCALE, // 기본 크기를 64px로 고정
-    height: (item.height || 128) * PIXEL_SCALE, // 기본 크기를 64px로 고정
-    transform: `
-      ${transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : ''}
-      rotate(${item.rotation || 0}deg)
-    `,
-    touchAction: 'none',
-  };
+  const rotation = item.rotation || 0;
+  const isSideways = rotation === 90 || rotation === 270;
+  const displayWidth = isSideways ? itemHeight : itemWidth;
+  const displayHeight = isSideways ? itemWidth : itemHeight;
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      {...listeners}
-      {...attributes}
-      onDoubleClick={() => onDeleteItem(item.id)}
+    <Rnd
+      size={{ width: displayWidth, height: displayHeight }}
+      position={{ x: item.x, y: item.y }}
+      onDragStop={(e, d) => {
+        onItemChange(item.id, { x: d.x, y: d.y });
+      }}
+      onResizeStop={(e, direction, ref, delta, position) => {
+        let newWidth = parseFloat(ref.style.width) / PIXEL_SCALE;
+        let newHeight = parseFloat(ref.style.height) / PIXEL_SCALE;
+
+        onItemChange(item.id, {
+          width: isSideways ? newHeight : newWidth,
+          height: isSideways ? newWidth : newHeight,
+          ...position,
+        });
+      }}
       onMouseEnter={() => onSetHoveredItem(item.id)}
       onMouseLeave={() => onSetHoveredItem(null)}
-      className="cursor-move filter drop-shadow-xl hover:scale-105 hover:drop-shadow-2xl transition-all duration-200"
-      title="더블클릭: 삭제 / 마우스 올리고 'R'키: 회전"
+      onDoubleClick={() => onDeleteItem(item.id)}
+      bounds="parent"
+      lockAspectRatio={false}
     >
-      <img src={item.icon} alt={item.name} className="w-full h-full object-contain" />
-    </div>
+      <div 
+        className="w-full h-full cursor-move filter drop-shadow-md"
+        title="더블클릭: 삭제 / 'R'키: 회전"
+        style={{
+          transform: `rotate(${rotation}deg)`,
+          transformOrigin: 'center center',
+        }}
+      >
+        <img src={item.icon} alt={item.name} className="w-full h-full object-contain" />
+      </div>
+    </Rnd>
   );
 };
 

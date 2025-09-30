@@ -1,29 +1,65 @@
+// App.jsx (최종 확인 버전)
+
 import React, { useState, useEffect } from 'react';
 import MapComponent from './components/MapComponent';
 import StoreDetail from './components/StoreDetail';
+import Home from './components/Home';
+import clsx from 'clsx';
 
-const Header = () => (
-  <header className="bg-white shadow-md z-20 w-full">
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="flex items-center justify-between h-16">
-        <h1 className="text-xl font-bold text-gray-800">🚀 AI 창업 내비게이터</h1>
+// --- 스타일 상수 정의 ---
+const appLayout = "flex flex-col h-screen font-sans";
+const headerStyles = "bg-white shadow-md z-20 w-full";
+const headerInner = "max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"; 
+const headerContent = "flex items-center justify-between h-16";
+const logoButton = "text-xl font-bold text-gray-800 cursor-pointer transition-transform active:scale-95";
+const mainLayout = "flex flex-grow overflow-hidden";
+const mapArea = "flex-grow h-full";
+const panelBase = "transition-all duration-500 ease-in-out bg-white shadow-lg";
+
+// --- 컴포넌트 정의 ---
+const Header = ({ onLogoClick }) => (
+  <header className={headerStyles}>
+    <div className={headerInner}>
+      <div className={headerContent}>
+        <h1 onClick={onLogoClick} className={logoButton}>
+          🗺️ NaviArch
+        </h1>
       </div>
     </div>
   </header>
 );
 
-const InitialPanel = () => (
-  <div className="flex items-center justify-center h-full">
-    <div className="text-center">
-      <p className="text-xl font-semibold text-gray-500">← 지도에서 상가를 선택해주세요.</p>
-      <p className="text-gray-400 mt-2">상가를 선택하면 상세 정보가 여기에 표시됩니다.</p>
+const MainApp = ({ stores, initialCenter }) => {
+  const [selectedStore, setSelectedStore] = useState(null);
+  const handleStoreSelect = (store) => { setSelectedStore(store); };
+  const handleClosePanel = () => { setSelectedStore(null); };
+
+  return (
+    <div className={mainLayout}>
+      <div className={mapArea}>
+        <MapComponent stores={stores} onStoreSelect={handleStoreSelect} initialCenter={initialCenter} />
+      </div>
+      <div
+        className={clsx(
+          panelBase,
+          {
+            'w-2/5 lg:w-[400px]': selectedStore,
+            'w-0': !selectedStore,
+          }
+        )}
+        style={{ overflow: 'hidden' }}
+      >
+        <div className="w-full h-full overflow-y-auto">
+          {selectedStore && <StoreDetail store={selectedStore} onClose={handleClosePanel} />}
+        </div>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 function App() {
   const [stores, setStores] = useState([]);
-  const [selectedStore, setSelectedStore] = useState(null);
+  const [mapCenter, setMapCenter] = useState(null);
 
   useEffect(() => {
     fetch('/stores.json')
@@ -33,13 +69,12 @@ function App() {
           .filter(store => store['위도'] && store['경도'])
           .map(store => ({
             id: store['점포(ID)'],
-            name: store['점포명'],
+            name: store['소재지도로명주소'],
             address: store['소재지도로명주소'] || store['소재지지번주소'],
             area: `${store['width']}㎡`,
             position: [store['위도'], store['경도']],
             floorPlan: {
-              width: 500,
-              height: 400,
+              width: 500, height: 400,
               walls: [
                 { id: 'w1', x: 0, y: 0, width: 500, height: 10 },
                 { id: 'w2', x: 0, y: 390, width: 500, height: 10 },
@@ -53,21 +88,17 @@ function App() {
       .catch(error => console.error("데이터를 불러오거나 처리하는 중 오류 발생:", error));
   }, []);
 
-  const handleStoreSelect = (store) => {
-    setSelectedStore(store);
-  };
+  const handleStart = (centerCoords) => { setMapCenter(centerCoords); };
+  const handleGoHome = () => { setMapCenter(null); };
 
   return (
-    <div className="flex flex-col h-screen font-sans">
-      <Header />
-      <div className="flex flex-grow overflow-hidden">
-        <div className="w-3/5 h-full">
-          <MapComponent stores={stores} onStoreSelect={handleStoreSelect} />
-        </div>
-        <div className="w-2/5 h-full bg-slate-50">
-          {selectedStore ? <StoreDetail store={selectedStore} /> : <InitialPanel />}
-        </div>
-      </div>
+    <div className={appLayout}>
+      <Header onLogoClick={handleGoHome} />
+      {mapCenter ? (
+        <MainApp stores={stores} initialCenter={mapCenter} />
+      ) : (
+        <Home onStart={handleStart} />
+      )}
     </div>
   );
 }

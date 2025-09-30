@@ -32,18 +32,19 @@ const furnitureData = {
   "테이블/의자": [
     { id: '4인 사각테이블', name: '4인 사각테이블', icon: '/icons/table_4_rect.png', width: 140, height: 80 },
     { id: '2인 원형테이블', name: '2인 원형테이블', icon: '/icons/table_2_round.png', width: 70, height: 70 },
+    { id: '2인 테이블', name: '2인 테이블', icon: '/icons/twotable.png', width: 80, height: 80 },
     { id: '1인 소파', name: '소파', icon: '/icons/armchair.png', width: 80, height: 80 },
   ],
   "수납/집기": [
     { id: '선반', name: '화분인테리어', icon: '/icons/display_shelf.png', width: 120, height: 40 },
-    { id: '옷걸이', name: '화장실', icon: '/icons/coat_rack.png', width: 50, height: 50 },
+    { id: '화장실', name: '화장실', icon: '/icons/coat_rack.png', width: 50, height: 50 },
   ],
   "주방": [
     { id: '주방', name: '주방', icon: '/icons/kitchen_island.png', width: 200, height: 100 },
-    { id: '업소용냉장고', name: '아일랜드 식탁', icon: '/icons/fridge.png', width: 120, height: 80 },
+    { id: '아일랜드 식탁', name: '아일랜드 식탁', icon: '/icons/fridge.png', width: 120, height: 80 },
   ],
   "사무/기타": [
-    { id: '컴퓨터책상', name: '당구대', icon: '/icons/computer_desk.png', width: 120, height: 60 },
+    { id: '당구대', name: '당구대', icon: '/icons/computer_desk.png', width: 120, height: 60 },
     { id: '화분', name: '화분', icon: '/icons/plant.png', width: 60, height: 60 },
   ]
 };
@@ -62,11 +63,13 @@ const FurniturePalette = () => {
             key={category}
             onMouseDownCapture={(e) => e.stopPropagation()}
             onClick={() => setActiveCategory(category)}
-            className={`px-4 py-2 text-sm font-semibold -mb-px border-b-2
-                        ${activeCategory === category 
-                          ? 'border-indigo-500 text-indigo-600' 
-                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
-          >
+            className={`px-4 py-2 text-sm font-semibold -mb-px border-b-2 transition-colors duration-300
+                    ${activeCategory === category 
+                      ? 'border-indigo-500 text-indigo-600' // 활성 탭
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' // 비활성 탭
+                    }`
+                  }
+                >
             {category}
           </button>
         ))}

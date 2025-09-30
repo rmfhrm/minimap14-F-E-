@@ -3,7 +3,7 @@ import { useDroppable } from '@dnd-kit/core';
 import PlacedItem from './PlacedItem';
 import PartitionWall from './PartitionWall';
 
-const FloorPlan = forwardRef(({ plan, placedItems, walls, onDeleteItem, onSetHoveredItem, floorTexture, onWallChange, onItemChange }, ref) => {
+const FloorPlan = forwardRef(({ plan, placedItems, walls, onDeleteItem, onSetHoveredItem, floorTexture, onWallChange, onItemChange, onDeleteWall, onSetHoveredWall }, ref) => {
   const { setNodeRef } = useDroppable({
     id: 'floor-plan-droppable-area',
   });
@@ -16,7 +16,7 @@ const FloorPlan = forwardRef(({ plan, placedItems, walls, onDeleteItem, onSetHov
     );
   }
 
-  const scale = 400 / plan.height;
+  const scale = 450 / plan.height;
 
   const mergeRefs = (...refs) => {
     return (node) => {
@@ -38,7 +38,9 @@ const FloorPlan = forwardRef(({ plan, placedItems, walls, onDeleteItem, onSetHov
         width: plan.width * scale,
         height: plan.height * scale,
         backgroundImage: `url(${floorTexture})`,
-        backgroundSize: '100px',
+        backgroundSize: 'contain',
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'center',
       }}
     >
       {plan.walls.map(wall => (
@@ -65,6 +67,8 @@ const FloorPlan = forwardRef(({ plan, placedItems, walls, onDeleteItem, onSetHov
           key={wall.id}
           wall={wall}
           onWallChange={onWallChange}
+          onDeleteWall={onDeleteWall} // ✨ props 전달
+          onSetHoveredWall={onSetHoveredWall} // ✨ props 전달
         />
       ))}
     </div>
